@@ -1,0 +1,60 @@
+import requests
+import numpy as np
+
+# URL til filen CO_2
+url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_gl.txt'
+
+# Last ned filen
+response = requests.get(url)
+lines = response.text.splitlines()
+
+# Hent ut tall fra kolonne 3 (Average), hopp over kommentarlignene
+average_co2 = []
+for line in lines:
+    if not line.startswith('%') and line.strip() != '':
+        parts = line.split()
+        try:
+            average_co2.append(float(parts[3]))  # Kolonne 3 = Average
+        except:
+            pass  # hopper over linjer som ikke kan konverteres til float
+
+
+# URL til temperaturdataene
+url = 'https://berkeley-earth-temperature.s3.us-west-1.amazonaws.com/Global/Land_and_Ocean_complete.txt'
+
+# Last ned filen
+response = requests.get(url)
+lines = response.text.splitlines()
+
+# Hent ut temperaturavvik fra kolonne 3 (månedlige data), hopp over kommentarlinjene
+temperature_anomalies = []
+for line in lines:
+    if not line.startswith('%') and line.strip() != '':
+        parts = line.split()
+        try:
+            year = int(parts[0])
+            month = int(parts[1])
+            if year >= 1979 and year <= 2024:
+                temperature_anomalies.append(float(parts[2]))  # Kolonne 3 = Temperaturavvik
+        except:
+            pass  # hopper over linjer som ikke kan konverteres til float
+
+
+        
+
+min_len = min(len(average_co2), len(temperature_anomalies))
+co2 = average_co2[:min_len]
+temp = temperature_anomalies[:min_len]
+
+# Beregn varians
+var_co2 = np.var(co2, ddof=1)
+var_temp = np.var(temp, ddof=1)
+
+# Beregn kovarians
+cov_matrix = np.cov(co2, temp)
+covariance = cov_matrix[0, 1]
+
+# Beregn korrelasjon
+correlation = covariance / np.sqrt(var_co2 * var_temp)
+
+print(f'Korrelasjon mellom CO₂ og temperaturavvik fra 1979 til 2024: {correlation:.4f}')
