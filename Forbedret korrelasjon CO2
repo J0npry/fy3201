@@ -57,11 +57,30 @@ sc = plt.scatter(merged_all["TempAnom"], merged_all["CO2"],
 # Regresjonslinje
 x_vals = np.linspace(merged_all["TempAnom"].min(), merged_all["TempAnom"].max(), 100)
 y_vals = intercept + slope*x_vals
-plt.plot(x_vals, y_vals, color="black", linestyle="--", linewidth=2, label=f"Pearsons korrelasjonskoeffisient = {r_value:.3f}")
 
-# Layout
+# Regresjonslinje
+plt.plot(x_vals, y_vals, color="black", linestyle="--", linewidth=2, label="Lineær regresjon")
+
+# Scatter
+sc = plt.scatter(merged_all["TempAnom"], merged_all["CO2"],
+                 c=merged_all["Year"], cmap="plasma", s=30, edgecolor='k', linewidth=0.3)
+
+# Fargebar
 cbar = plt.colorbar(sc)
 cbar.set_label("År")
+
+# Tekst for Pearson r i øverste høyre hjørne
+plt.text(
+    0.95, 0.05,  # x=95% mot høyre, y=5% opp fra bunnen
+    f"Korrelasjon = {r_value:.3f}",
+    transform=plt.gca().transAxes,  # koordinater går fra 0-1 i aksen
+    fontsize=12,
+    color="black",
+    ha="right",  # horisontal justering
+    va="bottom"  # vertikal justering
+)
+
+# Labels og tittel
 plt.xlabel("Globalt temperaturavvik fra normalen [°C]")
 plt.ylabel("CO₂ i atmosfæren [ppm]")
 plt.title("Temperaturavvik og CO₂ (1979 - 2024)")
