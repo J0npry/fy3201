@@ -2,11 +2,12 @@ import csv
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+
 def read_csv(file_name: str):
     file_path = os.path.join(os.path.dirname(__file__), file_name)
     with open(file_path, mode='r', newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile, delimiter=';')  
-        data = [row for row in reader]
+        data = [[cell.replace(',', '.') for cell in row] for row in reader]
     return np.array(data)[1:-1]
 
 data = read_csv('Jonas_1994-2024.csv')
@@ -43,18 +44,23 @@ for i in range(len(new_data_sorted)):
         min_temp_month_map[month] = np.append(min_temp_month_map[month], min_val)
     if not np.isnan(max_val):
         max_temp_month_map[month] = np.append(max_temp_month_map[month], max_val)
-print(max_temp_month_map[7])
 for i in range(1, 13):
     avrg_min_temp_by_month.append(float(np.average(min_temp_month_map[i])))
     avrg_max_temp_by_month.append(float(np.average(max_temp_month_map[i])))
 
 
-plt.plot(range(1, 13), avrg_min_temp_by_month, label='Gjennomsnittlig minimumstemperatur', marker='o')
-plt.plot(range(1, 13), avrg_max_temp_by_month, label='Gjennomsnittlig maksimumstemperatur', marker='o')
+plt.plot(range(1, 13), avrg_min_temp_by_month, label='Gjennomsnittlig minimumstemperatur 1994-2024', marker='o', color='blue')
+plt.plot(range(1, 13), avrg_max_temp_by_month, label='Gjennomsnittlig maksimumstemperatur 1994-2024', marker='o', color='red')
 plt.xticks(range(1, 13), ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Des'])
 plt.xlabel('Måned')
 plt.ylabel('Temperatur (C)')
-plt.title('Gjennomsnittlig månedlig minimums- og maksimumstemperatur (1994-2024)')
-plt.legend()
+plt.title('Månedlig minimums- og maksimumstemperatur')
 plt.grid()
+dara_2025 = read_csv('Jonas_2025.csv')
+dates_2025 = dara_2025[:,2]
+max_temps_2025 = convert_to_float(dara_2025[:,3])
+min_temps_2025 = convert_to_float(dara_2025[:,4])
+plt.plot(range(1, len(max_temps_2025)+1), max_temps_2025, label='Maksimumstemperatur 2025', marker='o', linestyle='--', color='orange')
+plt.plot(range(1, len(min_temps_2025)+1), min_temps_2025, label='Minimumstemperatur 2025', marker='o', linestyle='--', color='green')
+plt.legend()
 plt.show()
